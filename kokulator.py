@@ -1,5 +1,5 @@
 """
-Kokulator - An Advanced Calculator with Graphing
+Kokulator - An Advanced Scientific Calculator with Graphing
 A graphical calculator application with equation plotting built with Tkinter and Matplotlib
 """
 
@@ -8,14 +8,14 @@ from tkinter import font, messagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
-import re
+import math
 
 
 class Calculator:
     def __init__(self, root):
         self.root = root
-        self.root.title("Kokulator - Advanced Calculator")
-        self.root.geometry("1000x700")
+        self.root.title("Kokulator - Advanced Scientific Calculator")
+        self.root.geometry("1200x700")
         self.root.resizable(True, True)
         
         # Configure color scheme
@@ -25,6 +25,7 @@ class Calculator:
         self.display_color = "#ecf0f1"
         self.operation_color = "#e74c3c"
         self.text_color = "#ff9800"
+        self.scientific_color = "#9b59b6"
         
         self.root.configure(bg=self.bg_color)
         
@@ -34,7 +35,8 @@ class Calculator:
         self.previous_number = ""
         self.operation = None
         self.should_reset_display = False
-        self.equation_history = []
+        self.scientific_mode = False
+        self.angle_mode = "deg"  # deg or rad
         
         # Create main frame
         self.create_ui()
@@ -64,19 +66,41 @@ class Calculator:
         calc_frame = tk.Frame(parent, bg=self.bg_color)
         calc_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Title
-        title = tk.Label(calc_frame, text="Calculator", font=("Arial", 14, "bold"), 
+        # Title and mode toggle
+        title_frame = tk.Frame(calc_frame, bg=self.bg_color)
+        title_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        title = tk.Label(title_frame, text="Calculator", font=("Arial", 14, "bold"), 
                          bg=self.bg_color, fg=self.display_color)
-        title.pack(pady=(0, 10))
+        title.pack(side=tk.LEFT)
+        
+        self.mode_btn = tk.Button(title_frame, text="Scientific Mode", font=("Arial", 9, "bold"),
+                                  bg=self.scientific_color, fg=self.text_color, 
+                                  command=self.toggle_scientific_mode, cursor="hand2")
+        self.mode_btn.pack(side=tk.RIGHT)
         
         # Display
         self.create_display(calc_frame)
         
-        # Buttons
+        # Basic buttons
         self.create_buttons(calc_frame)
+        
+        # Scientific buttons (initially hidden)
+        self.scientific_frame = tk.Frame(calc_frame, bg=self.bg_color)
+        self.create_scientific_buttons(self.scientific_frame)
         
         # Equation input section
         self.create_equation_section(calc_frame)
+    
+    def toggle_scientific_mode(self):
+        """Toggle scientific mode on/off"""
+        self.scientific_mode = not self.scientific_mode
+        if self.scientific_mode:
+            self.scientific_frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+            self.mode_btn.config(relief=tk.SUNKEN, bg="#8e44ad")
+        else:
+            self.scientific_frame.pack_forget()
+            self.mode_btn.config(relief=tk.RAISED, bg=self.scientific_color)
     
     def create_display(self, parent):
         """Create the display area"""
@@ -97,7 +121,7 @@ class Calculator:
         display.pack(fill=tk.BOTH, expand=True)
     
     def create_buttons(self, parent):
-        """Create the button grid"""
+        """Create the basic button grid"""
         button_frame = tk.Frame(parent, bg=self.bg_color)
         button_frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
         
@@ -112,7 +136,7 @@ class Calculator:
         
         for row_idx, row in enumerate(buttons):
             for col_idx, btn_text in enumerate(row):
-                self.create_button(button_frame, btn_text, row_idx, col_idx)
+                self.create_button(button_frame, btn_text, row_idx, col_idx, self.btn_color)
         
         # Configure grid weights
         for i in range(5):
@@ -120,7 +144,112 @@ class Calculator:
         for i in range(4):
             button_frame.grid_columnconfigure(i, weight=1)
     
-    def create_button(self, parent, text, row, col):
+    def create_scientific_buttons(self, parent):
+        """Create scientific function buttons"""
+        sci_frame = tk.Frame(parent, bg=self.bg_color)
+        sci_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Trigonometric functions
+        trig_label = tk.Label(sci_frame, text="Trigonometric", font=("Arial", 10, "bold"),
+                             bg=self.bg_color, fg=self.display_color)
+        trig_label.pack(pady=(5, 0))
+        
+        trig_frame = tk.Frame(sci_frame, bg=self.bg_color)
+        trig_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        trig_buttons = [
+            ("sin", lambda: self.apply_function("sin")),
+            ("cos", lambda: self.apply_function("cos")),
+            ("tan", lambda: self.apply_function("tan")),
+            ("asin", lambda: self.apply_function("asin")),
+            ("acos", lambda: self.apply_function("acos")),
+            ("atan", lambda: self.apply_function("atan")),
+        ]
+        
+        for i, (text, cmd) in enumerate(trig_buttons):
+            btn = tk.Button(trig_frame, text=text, font=("Arial", 9, "bold"),
+                           bg=self.scientific_color, fg=self.text_color,
+                           command=cmd, cursor="hand2", width=8)
+            btn.grid(row=0, column=i, padx=2, pady=2, sticky="ew")
+        
+        for i in range(6):
+            trig_frame.grid_columnconfigure(i, weight=1)
+        
+        # Logarithmic functions
+        log_label = tk.Label(sci_frame, text="Logarithmic", font=("Arial", 10, "bold"),
+                            bg=self.bg_color, fg=self.display_color)
+        log_label.pack(pady=(5, 0))
+        
+        log_frame = tk.Frame(sci_frame, bg=self.bg_color)
+        log_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        log_buttons = [
+            ("log₁₀", lambda: self.apply_function("log10")),
+            ("ln", lambda: self.apply_function("log")),
+            ("e^x", lambda: self.apply_function("exp")),
+            ("2^x", lambda: self.append_number("2**")),
+        ]
+        
+        for i, (text, cmd) in enumerate(log_buttons):
+            btn = tk.Button(log_frame, text=text, font=("Arial", 9, "bold"),
+                           bg=self.scientific_color, fg=self.text_color,
+                           command=cmd, cursor="hand2", width=8)
+            btn.grid(row=0, column=i, padx=2, pady=2, sticky="ew")
+        
+        for i in range(4):
+            log_frame.grid_columnconfigure(i, weight=1)
+        
+        # Power and root functions
+        power_label = tk.Label(sci_frame, text="Powers & Roots", font=("Arial", 10, "bold"),
+                              bg=self.bg_color, fg=self.display_color)
+        power_label.pack(pady=(5, 0))
+        
+        power_frame = tk.Frame(sci_frame, bg=self.bg_color)
+        power_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        power_buttons = [
+            ("x²", lambda: self.append_number("**2")),
+            ("x³", lambda: self.append_number("**3")),
+            ("√x", lambda: self.apply_function("sqrt")),
+            ("ʸ√x", lambda: self.append_number("**(1/")),
+            ("1/x", lambda: self.apply_function("reciprocal")),
+        ]
+        
+        for i, (text, cmd) in enumerate(power_buttons):
+            btn = tk.Button(power_frame, text=text, font=("Arial", 9, "bold"),
+                           bg=self.scientific_color, fg=self.text_color,
+                           command=cmd, cursor="hand2", width=8)
+            btn.grid(row=0, column=i, padx=2, pady=2, sticky="ew")
+        
+        for i in range(5):
+            power_frame.grid_columnconfigure(i, weight=1)
+        
+        # Other functions
+        other_label = tk.Label(sci_frame, text="Other Functions", font=("Arial", 10, "bold"),
+                              bg=self.bg_color, fg=self.display_color)
+        other_label.pack(pady=(5, 0))
+        
+        other_frame = tk.Frame(sci_frame, bg=self.bg_color)
+        other_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        other_buttons = [
+            ("n!", lambda: self.apply_function("factorial")),
+            ("π", lambda: self.append_number(str(math.pi))),
+            ("e", lambda: self.append_number(str(math.e))),
+            ("°→rad", lambda: self.convert_angle()),
+            ("±", lambda: self.toggle_sign()),
+        ]
+        
+        for i, (text, cmd) in enumerate(other_buttons):
+            btn = tk.Button(other_frame, text=text, font=("Arial", 9, "bold"),
+                           bg=self.scientific_color, fg=self.text_color,
+                           command=cmd, cursor="hand2", width=8)
+            btn.grid(row=0, column=i, padx=2, pady=2, sticky="ew")
+        
+        for i in range(5):
+            other_frame.grid_columnconfigure(i, weight=1)
+    
+    def create_button(self, parent, text, row, col, default_color):
         """Create individual button"""
         # Determine button properties
         if text == "C":
@@ -136,7 +265,7 @@ class Calculator:
             bg_color = self.operation_color
             command = lambda t=text: self.append_number(t)
         else:
-            bg_color = self.btn_color
+            bg_color = default_color
             command = lambda t=text: self.append_number(t)
         
         btn = tk.Button(
@@ -248,6 +377,9 @@ class Calculator:
                 'sin': np.sin,
                 'cos': np.cos,
                 'tan': np.tan,
+                'asin': np.arcsin,
+                'acos': np.arccos,
+                'atan': np.arctan,
                 'sqrt': np.sqrt,
                 'exp': np.exp,
                 'log': np.log,
@@ -286,6 +418,85 @@ class Calculator:
         except Exception as e:
             messagebox.showerror("Error", f"Invalid equation: {e}")
     
+    def apply_function(self, func_name):
+        """Apply a scientific function to the current number"""
+        try:
+            if self.current_number == "":
+                messagebox.showwarning("Warning", "Please enter a number first")
+                return
+            
+            value = float(self.current_number)
+            result = None
+            
+            if func_name == "sin":
+                val = math.radians(value) if self.angle_mode == "deg" else value
+                result = math.sin(val)
+            elif func_name == "cos":
+                val = math.radians(value) if self.angle_mode == "deg" else value
+                result = math.cos(val)
+            elif func_name == "tan":
+                val = math.radians(value) if self.angle_mode == "deg" else value
+                result = math.tan(val)
+            elif func_name == "asin":
+                result = math.degrees(math.asin(value)) if self.angle_mode == "deg" else math.asin(value)
+            elif func_name == "acos":
+                result = math.degrees(math.acos(value)) if self.angle_mode == "deg" else math.acos(value)
+            elif func_name == "atan":
+                result = math.degrees(math.atan(value)) if self.angle_mode == "deg" else math.atan(value)
+            elif func_name == "sqrt":
+                result = math.sqrt(value)
+            elif func_name == "log10":
+                result = math.log10(value)
+            elif func_name == "log":
+                result = math.log(value)
+            elif func_name == "exp":
+                result = math.exp(value)
+            elif func_name == "factorial":
+                result = math.factorial(int(value))
+            elif func_name == "reciprocal":
+                result = 1 / value
+            
+            if result is not None:
+                self.current_number = str(result)
+                self.should_reset_display = True
+                self.update_display()
+        
+        except Exception as e:
+            messagebox.showerror("Error", f"Invalid operation: {e}")
+    
+    def convert_angle(self):
+        """Convert between degrees and radians"""
+        try:
+            if self.current_number == "":
+                messagebox.showwarning("Warning", "Please enter a number first")
+                return
+            
+            value = float(self.current_number)
+            if self.angle_mode == "deg":
+                result = math.radians(value)
+                self.angle_mode = "rad"
+            else:
+                result = math.degrees(value)
+                self.angle_mode = "deg"
+            
+            self.current_number = str(result)
+            self.should_reset_display = True
+            self.update_display()
+        except Exception as e:
+            messagebox.showerror("Error", f"Invalid operation: {e}")
+    
+    def toggle_sign(self):
+        """Toggle the sign of the current number"""
+        if self.current_number == "":
+            return
+        
+        try:
+            value = float(self.current_number)
+            self.current_number = str(-value)
+            self.update_display()
+        except:
+            pass
+    
     def append_number(self, number):
         """Append number to display"""
         if self.should_reset_display:
@@ -295,19 +506,6 @@ class Calculator:
             self.current_number += str(number)
         
         self.update_display()
-    
-    def set_operation(self, op):
-        """Set the operation"""
-        if self.current_number == "":
-            return
-        
-        if self.previous_number != "":
-            self.calculate()
-        
-        self.operation = op
-        self.previous_number = self.current_number
-        self.current_number = ""
-        self.should_reset_display = True
     
     def calculate(self):
         """Perform calculation"""
