@@ -95,8 +95,8 @@ class Calculator:
             widget.pack_forget()
         
         if self.view_mode == "standard":
-            # Show only calculator
-            self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=False, padx=(0, 0))
+            # Show only calculator with full width
+            self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 0))
             self.right_frame.pack_forget()
         else:  # graphical
             # Show only graph
