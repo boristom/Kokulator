@@ -20,7 +20,7 @@ class Calculator:
         self.btn_hover = "#3d5a80"
         self.display_color = "#ecf0f1"
         self.operation_color = "#e74c3c"
-        self.text_color = "#ffffff"  # White text for better visibility
+        self.text_color = "#ff9800"  # Orange text for better visibility
         
         self.root.configure(bg=self.bg_color)
         
