@@ -26,6 +26,7 @@ class Calculator:
         self.operation_color = "#e74c3c"
         self.text_color = "#ff9800"
         self.scientific_color = "#9b59b6"
+        self.mode_color = "#16a085"
         
         self.root.configure(bg=self.bg_color)
         
@@ -37,29 +38,70 @@ class Calculator:
         self.should_reset_display = False
         self.scientific_mode = False
         self.angle_mode = "deg"  # deg or rad
+        self.view_mode = "standard"  # standard or graphical
         
         # Create main frame
         self.create_ui()
     
     def create_ui(self):
-        """Create the main UI with calculator and graph sections"""
+        """Create the main UI with mode toggle"""
+        # Top bar with mode toggle
+        top_bar = tk.Frame(self.root, bg=self.bg_color)
+        top_bar.pack(fill=tk.X, padx=10, pady=(10, 5))
+        
+        title = tk.Label(top_bar, text="Kokulator", font=("Arial", 16, "bold"),
+                        bg=self.bg_color, fg=self.display_color)
+        title.pack(side=tk.LEFT)
+        
+        self.view_mode_btn = tk.Button(top_bar, text="📊 Graphical Mode", font=("Arial", 10, "bold"),
+                                       bg=self.mode_color, fg=self.text_color,
+                                       command=self.toggle_view_mode, cursor="hand2")
+        self.view_mode_btn.pack(side=tk.RIGHT)
+        
         # Main container with two sections
-        main_container = tk.Frame(self.root, bg=self.bg_color)
-        main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.main_container = tk.Frame(self.root, bg=self.bg_color)
+        self.main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # Left side - Calculator
-        left_frame = tk.Frame(main_container, bg=self.bg_color)
-        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=False, padx=(0, 10))
+        self.left_frame = tk.Frame(self.main_container, bg=self.bg_color)
         
         # Right side - Graph
-        right_frame = tk.Frame(main_container, bg=self.bg_color)
-        right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        self.right_frame = tk.Frame(self.main_container, bg=self.bg_color)
         
         # Create calculator in left frame
-        self.create_calculator(left_frame)
+        self.create_calculator(self.left_frame)
         
         # Create graph area in right frame
-        self.create_graph_area(right_frame)
+        self.create_graph_area(self.right_frame)
+        
+        # Initial layout - standard mode (show calculator)
+        self.update_view_mode()
+    
+    def toggle_view_mode(self):
+        """Toggle between standard and graphical modes"""
+        if self.view_mode == "standard":
+            self.view_mode = "graphical"
+            self.view_mode_btn.config(text="🧮 Standard Mode")
+        else:
+            self.view_mode = "standard"
+            self.view_mode_btn.config(text="📊 Graphical Mode")
+        
+        self.update_view_mode()
+    
+    def update_view_mode(self):
+        """Update the layout based on current view mode"""
+        # Clear previous layout
+        for widget in self.main_container.winfo_children():
+            widget.pack_forget()
+        
+        if self.view_mode == "standard":
+            # Show only calculator
+            self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=False, padx=(0, 0))
+            self.right_frame.pack_forget()
+        else:  # graphical
+            # Show only graph
+            self.left_frame.pack_forget()
+            self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(0, 0))
     
     def create_calculator(self, parent):
         """Create the calculator interface"""
