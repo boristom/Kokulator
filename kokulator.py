@@ -15,7 +15,7 @@ class Calculator:
     def __init__(self, root):
         self.root = root
         self.root.title("Kokulator - Advanced Scientific Calculator")
-        self.root.geometry("1200x700")
+        self.root.geometry("800x700")
         self.root.resizable(True, True)
         
         # Configure color scheme
