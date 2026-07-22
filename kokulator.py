@@ -130,9 +130,6 @@ class Calculator:
         # Scientific buttons (initially hidden)
         self.scientific_frame = tk.Frame(calc_frame, bg=self.bg_color)
         self.create_scientific_buttons(self.scientific_frame)
-        
-        # Equation input section
-        self.create_equation_section(calc_frame)
     
     def toggle_scientific_mode(self):
         """Toggle scientific mode on/off"""
@@ -324,10 +321,14 @@ class Calculator:
         )
         btn.grid(row=row, column=col, padx=3, pady=3, sticky="nsew")
     
-    def create_equation_section(self, parent):
-        """Create the equation input and plotting section"""
-        eq_frame = tk.Frame(parent, bg=self.bg_color)
-        eq_frame.pack(pady=10, padx=10, fill=tk.BOTH)
+    def create_graph_area(self, parent):
+        """Create the graph display area with equation input"""
+        graph_container = tk.Frame(parent, bg=self.bg_color)
+        graph_container.pack(fill=tk.BOTH, expand=True)
+        
+        # Equation input section at the top
+        eq_frame = tk.Frame(graph_container, bg=self.bg_color)
+        eq_frame.pack(pady=10, padx=10, fill=tk.X)
         
         # Title
         title = tk.Label(eq_frame, text="Equation Plotter", font=("Arial", 12, "bold"),
@@ -365,16 +366,14 @@ class Calculator:
         tk.Label(range_frame, text="to", font=("Arial", 9),
                 bg=self.bg_color, fg=self.display_color).pack(side=tk.LEFT, padx=2)
         tk.Entry(range_frame, textvariable=self.x_max_var, font=("Arial", 9), width=6).pack(side=tk.LEFT, padx=2)
-    
-    def create_graph_area(self, parent):
-        """Create the graph display area"""
-        # Title
-        title = tk.Label(parent, text="Graph", font=("Arial", 14, "bold"),
-                        bg=self.bg_color, fg=self.display_color)
-        title.pack(pady=(0, 10))
+        
+        # Graph title
+        graph_title = tk.Label(graph_container, text="Graph", font=("Arial", 14, "bold"),
+                              bg=self.bg_color, fg=self.display_color)
+        graph_title.pack(pady=(10, 5))
         
         # Canvas for matplotlib
-        self.graph_frame = tk.Frame(parent, bg=self.bg_color)
+        self.graph_frame = tk.Frame(graph_container, bg=self.bg_color)
         self.graph_frame.pack(fill=tk.BOTH, expand=True)
         
         # Initialize with empty plot
