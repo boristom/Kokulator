@@ -15,7 +15,7 @@ class Calculator:
     def __init__(self, root):
         self.root = root
         self.root.title("Kokulator - Advanced Scientific Calculator")
-        self.root.geometry("800x700")
+        self.root.geometry("1200x700")
         self.root.resizable(True, True)
         
         # Configure color scheme
@@ -39,9 +39,38 @@ class Calculator:
         self.scientific_mode = False
         self.angle_mode = "deg"  # deg or rad
         self.view_mode = "standard"  # standard or graphical
+        self.last_was_calculation = False  # Track if last action was a calculation
+        
+        # Bind keyboard events
+        self.root.bind('<Key>', self.on_key_press)
         
         # Create main frame
         self.create_ui()
+    
+    def on_key_press(self, event):
+        """Handle keyboard input"""
+        char = event.char
+        
+        # Handle number keys and decimal point
+        if char.isdigit() or char == '.':
+            self.append_number(char)
+        # Handle operators
+        elif char in ['+', '-', '*', '/']:
+            self.append_number(char)
+        # Handle parentheses
+        elif char == '(':
+            self.append_number('(')
+        elif char == ')':
+            self.append_number(')')
+        # Handle Enter/Return for calculation
+        elif event.keysym == 'Return':
+            self.calculate()
+        # Handle Backspace for deletion
+        elif event.keysym == 'BackSpace':
+            self.delete()
+        # Handle Escape for clear
+        elif event.keysym == 'Escape':
+            self.clear()
     
     def create_ui(self):
         """Create the main UI with mode toggle"""
@@ -500,6 +529,7 @@ class Calculator:
             if result is not None:
                 self.current_number = str(result)
                 self.should_reset_display = True
+                self.last_was_calculation = True
                 self.update_display()
         
         except Exception as e:
@@ -522,6 +552,7 @@ class Calculator:
             
             self.current_number = str(result)
             self.should_reset_display = True
+            self.last_was_calculation = True
             self.update_display()
         except Exception as e:
             messagebox.showerror("Error", f"Invalid operation: {e}")
@@ -540,22 +571,34 @@ class Calculator:
     
     def append_number(self, number):
         """Append number to display"""
+        # If we just finished a calculation and user presses a number/operator
         if self.should_reset_display:
-            self.current_number = str(number)
-            self.should_reset_display = False
-        else:
-            self.current_number += str(number)
+            # If it's an operator, keep the result and add the operator
+            if number in ['+', '-', '*', '/']:
+                self.should_reset_display = False
+            else:
+                # If it's a number, start fresh
+                self.current_number = str(number)
+                self.should_reset_display = False
+                self.update_display()
+                return
         
+        self.current_number += str(number)
+        self.last_was_calculation = False
         self.update_display()
     
     def calculate(self):
         """Perform calculation"""
         try:
+            if self.current_number == "":
+                return
+            
             expression = self.current_number
             result = eval(expression)
             
             self.current_number = str(result)
             self.should_reset_display = True
+            self.last_was_calculation = True
             self.update_display()
             
         except Exception as e:
@@ -568,12 +611,15 @@ class Calculator:
         self.previous_number = ""
         self.operation = None
         self.should_reset_display = False
+        self.last_was_calculation = False
         self.update_display()
     
     def delete(self):
         """Delete last digit"""
         if self.current_number:
             self.current_number = self.current_number[:-1]
+            self.should_reset_display = False
+            self.last_was_calculation = False
             self.update_display()
     
     def update_display(self):
