@@ -1,0 +1,6 @@
+# Kokulator Requirements
+# Python 3.x with tkinter (usually included)
+# No external dependencies required - tkinter comes with Python!
+
+# For development/testing:
+pytest==7.0.0
