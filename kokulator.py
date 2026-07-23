@@ -87,7 +87,7 @@ class Calculator:
         title.pack(side=tk.LEFT)
         
         self.view_mode_btn = tk.Button(top_bar, text="📊 Graphical Mode", font=("Arial", 10, "bold"),
-                                       bg=self.mode_color, fg=self.text_color,
+                                       bg=self.mode_color, fg="black",
                                        command=self.toggle_view_mode, cursor="hand2")
         self.view_mode_btn.pack(side=tk.RIGHT)
         
@@ -150,7 +150,7 @@ class Calculator:
         title.pack(side=tk.LEFT)
         
         self.mode_btn = tk.Button(title_frame, text="Scientific Mode", font=("Arial", 9, "bold"),
-                                  bg=self.scientific_color, fg=self.text_color, 
+                                  bg=self.scientific_color, fg="black",
                                   command=self.toggle_scientific_mode, cursor="hand2")
         self.mode_btn.pack(side=tk.RIGHT)
         
