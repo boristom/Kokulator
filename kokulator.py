@@ -18,15 +18,19 @@ class Calculator:
         self.root.geometry("1200x700")
         self.root.resizable(True, True)
         
-        # Configure color scheme
-        self.bg_color = "#2c3e50"
-        self.btn_color = "#34495e"
-        self.btn_hover = "#3d5a80"
-        self.display_color = "#ecf0f1"
-        self.operation_color = "#e74c3c"
-        self.text_color = "#ff9800"
-        self.scientific_color = "#9b59b6"
-        self.mode_color = "#16a085"
+        # Solarized Dark color scheme
+        self.bg_color = "#002b36"          # base03
+        self.surface_color = "#073642"     # base02
+        self.btn_color = "#eee8d5"         # base2
+        self.btn_hover = "#fdf6e3"         # base3
+        self.display_color = "#eee8d5"     # base2
+        self.operation_color = "#cb4b16"   # orange
+        self.equals_color = "#859900"      # green
+        self.text_color = "#fdf6e3"        # base3
+        self.key_text_color = "#002b36"    # dark text on light keys
+        self.scientific_color = "#6c71c4"  # violet
+        self.mode_color = "#2aa198"        # cyan
+        self.grid_color = "#586e75"        # base01
         
         self.root.configure(bg=self.bg_color)
         
@@ -165,7 +169,7 @@ class Calculator:
         self.scientific_mode = not self.scientific_mode
         if self.scientific_mode:
             self.scientific_frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
-            self.mode_btn.config(relief=tk.SUNKEN, bg="#8e44ad")
+            self.mode_btn.config(relief=tk.SUNKEN, bg="#d33682")
         else:
             self.scientific_frame.pack_forget()
             self.mode_btn.config(relief=tk.RAISED, bg=self.scientific_color)
@@ -236,7 +240,7 @@ class Calculator:
         
         for i, (text, cmd) in enumerate(trig_buttons):
             btn = tk.Button(trig_frame, text=text, font=("Arial", 9, "bold"),
-                           bg=self.scientific_color, fg=self.text_color,
+                           bg=self.btn_color, fg=self.key_text_color,
                            command=cmd, cursor="hand2", width=8)
             btn.grid(row=0, column=i, padx=2, pady=2, sticky="ew")
         
@@ -260,7 +264,7 @@ class Calculator:
         
         for i, (text, cmd) in enumerate(log_buttons):
             btn = tk.Button(log_frame, text=text, font=("Arial", 9, "bold"),
-                           bg=self.scientific_color, fg=self.text_color,
+                           bg=self.btn_color, fg=self.key_text_color,
                            command=cmd, cursor="hand2", width=8)
             btn.grid(row=0, column=i, padx=2, pady=2, sticky="ew")
         
@@ -285,7 +289,7 @@ class Calculator:
         
         for i, (text, cmd) in enumerate(power_buttons):
             btn = tk.Button(power_frame, text=text, font=("Arial", 9, "bold"),
-                           bg=self.scientific_color, fg=self.text_color,
+                           bg=self.btn_color, fg=self.key_text_color,
                            command=cmd, cursor="hand2", width=8)
             btn.grid(row=0, column=i, padx=2, pady=2, sticky="ew")
         
@@ -310,7 +314,7 @@ class Calculator:
         
         for i, (text, cmd) in enumerate(other_buttons):
             btn = tk.Button(other_frame, text=text, font=("Arial", 9, "bold"),
-                           bg=self.scientific_color, fg=self.text_color,
+                           bg=self.btn_color, fg=self.key_text_color,
                            command=cmd, cursor="hand2", width=8)
             btn.grid(row=0, column=i, padx=2, pady=2, sticky="ew")
         
@@ -327,7 +331,7 @@ class Calculator:
             bg_color = self.operation_color
             command = self.delete
         elif text == "=":
-            bg_color = "#27ae60"
+            bg_color = self.equals_color
             command = self.calculate
         elif text in ["+", "-", "*", "/", "(", ")"]:
             bg_color = self.operation_color
@@ -341,10 +345,10 @@ class Calculator:
             text=text,
             font=("Arial", 16, "bold"),
             bg=bg_color,
-            fg=self.text_color,
+            fg=self.key_text_color,
             border=0,
             activebackground=self.btn_hover,
-            activeforeground=self.text_color,
+            activeforeground=self.key_text_color,
             command=command,
             cursor="hand2"
         )
@@ -377,7 +381,7 @@ class Calculator:
         self.equation_entry.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
         
         plot_btn = tk.Button(input_frame, text="Plot", font=("Arial", 10, "bold"),
-                            bg="#27ae60", fg=self.text_color, command=self.plot_equation,
+                            bg=self.equals_color, fg=self.text_color, command=self.plot_equation,
                             cursor="hand2")
         plot_btn.pack(side=tk.LEFT, padx=5)
         
@@ -411,9 +415,9 @@ class Calculator:
     def initialize_plot(self):
         """Initialize an empty plot"""
         fig, ax = plt.subplots(figsize=(6, 5), dpi=100)
-        fig.patch.set_facecolor('#2c3e50')
-        ax.set_facecolor('#34495e')
-        ax.grid(True, color='#555', alpha=0.3)
+        fig.patch.set_facecolor(self.bg_color)
+        ax.set_facecolor(self.surface_color)
+        ax.grid(True, color=self.grid_color, alpha=0.45)
         ax.text(0.5, 0.5, 'Enter an equation and click Plot', 
                 ha='center', va='center', transform=ax.transAxes,
                 color=self.display_color, fontsize=12)
@@ -464,17 +468,17 @@ class Calculator:
             # Clear previous plot
             self.fig.clear()
             ax = self.fig.add_subplot(111)
-            ax.set_facecolor('#34495e')
+            ax.set_facecolor(self.surface_color)
             fig = self.fig
-            fig.patch.set_facecolor('#2c3e50')
+            fig.patch.set_facecolor(self.bg_color)
             
             # Plot
             ax.plot(x, y, color=self.text_color, linewidth=2, label=f'y = {equation}')
-            ax.grid(True, color='#555', alpha=0.3)
+            ax.grid(True, color=self.grid_color, alpha=0.45)
             ax.set_xlabel('x', color=self.display_color)
             ax.set_ylabel('y', color=self.display_color)
             ax.tick_params(colors=self.display_color)
-            ax.legend(loc='upper left', facecolor='#34495e', edgecolor=self.display_color, 
+            ax.legend(loc='upper left', facecolor=self.surface_color, edgecolor=self.display_color, 
                      labelcolor=self.display_color)
             
             # Color the spine
