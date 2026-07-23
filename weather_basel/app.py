@@ -1,4 +1,4 @@
-"""Five-day weather forecast for Basel, Switzerland."""
+"""Ten-day weather forecast for Basel, Switzerland."""
 
 import json
 import os
@@ -47,7 +47,7 @@ def get_forecast():
         **BASEL,
         "daily": ",".join(DAILY_FIELDS),
         "timezone": "Europe/Zurich",
-        "forecast_days": 5,
+        "forecast_days": 10,
     }
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     with urlopen(f"{API_URL}?{urlencode(params)}", timeout=15, context=ssl_context) as response:
@@ -66,9 +66,9 @@ class WeatherApp:
 
     def __init__(self, root):
         self.root = root
-        self.root.title("Basel Wetter · 5 Tage")
-        self.root.geometry("910x490")
-        self.root.minsize(760, 410)
+        self.root.title("Basel Wetter · 10 Tage")
+        self.root.geometry("910x730")
+        self.root.minsize(760, 620)
         self.root.configure(bg=self.BG)
 
         header = tk.Frame(root, bg=self.BG)
@@ -121,8 +121,10 @@ class WeatherApp:
 
     def _create_card(self, index, daily, date_value):
         card = tk.Frame(self.cards, bg=self.SURFACE, padx=16, pady=17)
-        card.grid(row=0, column=index, padx=5, sticky="nsew")
-        self.cards.grid_columnconfigure(index, weight=1, uniform="day")
+        row, column = divmod(index, 5)
+        card.grid(row=row, column=column, padx=5, pady=5, sticky="nsew")
+        self.cards.grid_columnconfigure(column, weight=1, uniform="day")
+        self.cards.grid_rowconfigure(row, weight=1)
 
         parsed_date = date.fromisoformat(date_value)
         weekday = ("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")[parsed_date.weekday()]

@@ -1,6 +1,6 @@
 # Basel Wetter
 
-Eine kleine Tkinter-Anwendung, die die Wettervorhersage für die nächsten fünf Tage in Basel anzeigt. Die Daten kommen live von der [Open-Meteo Forecast API](https://open-meteo.com/en/docs); dafür ist kein API-Schlüssel nötig.
+Eine kleine Tkinter-Anwendung, die die Wettervorhersage für die nächsten zehn Tage in Basel anzeigt. Die Daten kommen live von der [Open-Meteo Forecast API](https://open-meteo.com/en/docs); dafür ist kein API-Schlüssel nötig.
 
 ## Starten
 
